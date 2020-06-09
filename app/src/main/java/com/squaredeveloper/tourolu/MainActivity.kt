@@ -1,16 +1,14 @@
 package com.squaredeveloper.tourolu
 
 import android.graphics.Bitmap
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
-import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -22,39 +20,41 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+
         loadWebview(Constant.url)
 
+
     }
 
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
-            R.id.navigation_home -> {
-                 loadWebview(Constant.url)
-                return@OnNavigationItemSelectedListener true
+    private val mOnNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    loadWebview(Constant.url)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.navigation_flight -> {
+                    loadWebview(Constant.flights)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.navigation_hotel -> {
+                    loadWebview(Constant.hotels)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.navigation_visa -> {
+                    loadWebview(Constant.visa)
+                    return@OnNavigationItemSelectedListener true
+                }
+                R.id.navigation_tours -> {
+                    loadWebview(Constant.tours)
+                    return@OnNavigationItemSelectedListener true
+                }
             }
-            R.id.navigation_flight -> {
-                  loadWebview(Constant.flights)
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_hotel -> {
-                loadWebview(Constant.hotels)
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_visa -> {
-                loadWebview(Constant.visa)
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_tours -> {
-                loadWebview(Constant.visa)
-                return@OnNavigationItemSelectedListener true
-            }
+            false
         }
-        false
-    }
 
-    private fun loadWebview(url:String) {
+    private fun loadWebview(url: String) {
         val settings = webview.settings
-        webview.loadUrl(url)
         settings.javaScriptEnabled = true
 
         // Enable and setup web view cache
@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
         settings.setAppCachePath(cacheDir.path)
 
         settings.loadsImagesAutomatically = true
-
         settings.useWideViewPort = true
         settings.loadWithOverviewMode = true
         settings.javaScriptCanOpenWindowsAutomatically = true
@@ -77,32 +76,54 @@ class MainActivity : AppCompatActivity() {
         settings.allowFileAccess = true
         webview.fitsSystemWindows = true
 
+        if (Utilities.isNetworkConnected(this)) {
+            webview.loadUrl(url)
+        } else {
+           showToast()
+        }
 
-        webview.webViewClient = object: WebViewClient(){
+
+        webview.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 // Page loading started
-               progressbar.visibility = View.VISIBLE
+                progressbar.visibility = View.VISIBLE
 
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView, url: String?): Boolean {
+                if (!Utilities.isNetworkConnected(this@MainActivity)) {
+                    showToast()
+                    webview.visibility = View.GONE
+                } else {
+                    showToast()
+                    webview.visibility = View.VISIBLE
+                    view.loadUrl(url)
+                }
+
+                return true
             }
 
             override fun onPageFinished(view: WebView, url: String) {
                 // Page loading finished
                 progressbar.visibility = View.GONE
             }
+
+
         }
 
-        webview.webChromeClient = object: WebChromeClient(){
+        webview.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
-               // progress_bar.progress = newProgress
-
             }
         }
+    }
+
+    private fun showToast() {
+        Toast.makeText(this, "No active internet connection!", Toast.LENGTH_SHORT).show()
     }
 
     // Handle back button press in web view
     override fun onBackPressed() {
         if (webview.canGoBack()) {
-            // If web view have back history, then go to the web view back history
             webview.goBack()
         } else {
             finish()
