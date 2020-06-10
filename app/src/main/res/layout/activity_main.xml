@@ -25,6 +25,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
 
+        <TextView
+            android:id="@+id/tv_nointernet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="No active connnection detected"
+            android:background="@color/white"
+            android:textStyle="italic"/>
+
 
     </FrameLayout>
 
@@ -34,6 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:itemIconTint="@color/gray"
+        app:itemTextColor="@color/white"
         android:background="@color/colorPrimaryDark"
         app:menu="@menu/nav" />
 

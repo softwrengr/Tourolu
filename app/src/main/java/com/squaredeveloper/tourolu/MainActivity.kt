@@ -1,28 +1,24 @@
 package com.squaredeveloper.tourolu
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
 
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
 
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-
         loadWebview(Constant.url)
-
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
     }
 
@@ -41,45 +37,40 @@ class MainActivity : AppCompatActivity() {
                     loadWebview(Constant.hotels)
                     return@OnNavigationItemSelectedListener true
                 }
-                R.id.navigation_visa -> {
-                    loadWebview(Constant.visa)
+                R.id.navigation_villas -> {
+                    loadWebview(Constant.villas)
                     return@OnNavigationItemSelectedListener true
                 }
-                R.id.navigation_tours -> {
-                    loadWebview(Constant.tours)
+                R.id.navigation_car -> {
+                    loadWebview(Constant.car)
                     return@OnNavigationItemSelectedListener true
                 }
             }
             false
         }
 
-    private fun loadWebview(url: String) {
-        val settings = webview.settings
-        settings.javaScriptEnabled = true
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun loadWebview(webViewUrl: String) {
+
 
         // Enable and setup web view cache
-        settings.setAppCacheEnabled(true)
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.setAppCachePath(cacheDir.path)
+        webview.settings.setAppCacheEnabled(true)
+        webview.settings.cacheMode = WebSettings.LOAD_DEFAULT
+        webview.settings.setAppCachePath(cacheDir.path)
 
-        settings.loadsImagesAutomatically = true
-        settings.useWideViewPort = true
-        settings.loadWithOverviewMode = true
-        settings.javaScriptCanOpenWindowsAutomatically = true
-        settings.mediaPlaybackRequiresUserGesture = false
-        settings.domStorageEnabled = true
-        settings.setSupportMultipleWindows(true)
-        settings.loadWithOverviewMode = true
-        settings.allowContentAccess = true
-        settings.setGeolocationEnabled(true)
-        settings.allowUniversalAccessFromFileURLs = true
-        settings.allowFileAccess = true
+        webview.settings.javaScriptEnabled = true
+        webview.settings.loadWithOverviewMode = true
+        webview.settings.useWideViewPort = true
+        webview.settings.domStorageEnabled = true
+        webview.settings.javaScriptCanOpenWindowsAutomatically = true
         webview.fitsSystemWindows = true
 
-        if (Utilities.isNetworkConnected(this)) {
-            webview.loadUrl(url)
+        if (!Utilities.isNetworkConnected(this)) {
+            showToast()
+            tv_nointernet.visibility = View.VISIBLE
         } else {
-           showToast()
+            tv_nointernet.visibility = View.GONE
+            webview.loadUrl(webViewUrl)
         }
 
 
@@ -87,18 +78,15 @@ class MainActivity : AppCompatActivity() {
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                 // Page loading started
                 progressbar.visibility = View.VISIBLE
+                super.onPageStarted(view, url, favicon)
 
             }
 
             override fun shouldOverrideUrlLoading(view: WebView, url: String?): Boolean {
                 if (!Utilities.isNetworkConnected(this@MainActivity)) {
-                    showToast()
-                    webview.visibility = View.GONE
-                } else {
-                    showToast()
-                    webview.visibility = View.VISIBLE
-                    view.loadUrl(url)
+                    tv_nointernet.visibility = View.VISIBLE
                 }
+                view.loadUrl(url)
 
                 return true
             }
@@ -106,18 +94,12 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView, url: String) {
                 // Page loading finished
                 progressbar.visibility = View.GONE
-            }
-
-
-        }
-
-        webview.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView, newProgress: Int) {
+                super.onPageFinished(view, url)
             }
         }
     }
 
-    private fun showToast() {
+    fun showToast() {
         Toast.makeText(this, "No active internet connection!", Toast.LENGTH_SHORT).show()
     }
 

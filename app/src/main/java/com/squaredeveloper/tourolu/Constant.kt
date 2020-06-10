@@ -7,7 +7,7 @@ companion object{
 
     const val flights:String = "https://tourolu.com/flights/"
     const val hotels:String = "https://tourolu.com/hotels/"
-    const val tours:String = "https://tourolu.com/tours/"
-    const val visa:String = "https://tourolu.com/ivisa/"
+    const val car:String = "https://tourolu.com/car-rentals/"
+    const val villas:String = "https://tourolu.com/villas/"
 }
 }
